@@ -1,8 +1,15 @@
-FROM centos:latest
-RUN yum install -y openssh-server
-RUN mkdir /var/run/sshd
-RUN useradd -c "SSH User" -m sshuser
-RUN echo "sshuser:sshuser" | chpasswd
-RUN ssh-keygen -t rsa -f /etc/ssh/ssh_host_rsa_key -q -N ""
-EXPOSE 22
-CMD ["/usr/sbin/sshd","-D"]
+
+FROM ubuntu:18.04ENV DEBIAN_FRONTEND=non-interactive
+# Install dependencies
+RUN apt-get update -y
+RUN apt-get install -y git curl apache2 php libapache2-mod-php php-mysql# Install app
+RUN rm -rf /var/www/html/*
+ADD src /var/www/html/# Configure apache
+RUN a2enmod rewrite
+RUN chown -R www-data:www-data /var/www/html
+ENV APACHE_RUN_DIR /var/www/html
+ENV APACHE_RUN_USER www-data
+ENV APACHE_RUN_GROUP www-data
+ENV APACHE_LOG_DIR /var/log/apache2
+EXPOSE 80CMD ["/usr/sbin/apache2", "-D", "FOREGROUND"]
+
